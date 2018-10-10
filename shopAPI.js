@@ -1,5 +1,12 @@
 module.exports = {
   foo:function(router, connection,mc,socketControl) {
+    //TABLE PROPERTIES
+     let TABLE_NAME = "tbl_shop";
+     let COL_ID = "id";
+     let COL_NAME = "name";
+     let COL_DESC = "description";
+     let COL_PRICE = "price";
+     let COL_IMAGEPATH = "imagepath";
     /////SHOP/////
     // POST
     // insert with or without attachment (form-data will do) - support multi-part
@@ -11,7 +18,7 @@ module.exports = {
           let price = req.body.price;
           if (!req.files) {
             console.log(`no file to be uploaded`);
-            mc.query(`INSERT INTO tbl_shop (name,description,price) VALUES ('${name}','${description}','${price}')`, function (error, results, fields) {
+            mc.query(`INSERT INTO ${TABLE_NAME} (${COL_NAME},(${COL_DESC},(${COL_PRICE}) VALUES ('${name}','${description}','${price}')`, function (error, results, fields) {
                 if (error) return res.send({ error: true, data: error, message: 'Insertion failed' });
                 var jsonString={ error: false, data: results, message: 'New row was inserted.' };
                 socketControl.sendToConnectedSocket("shop",jsonString);
@@ -25,7 +32,7 @@ module.exports = {
                  return res.status(500).send(err);
                }
                console.log(`File uploaded file name: ${attachment.name}`);
-               mc.query(`INSERT INTO tbl_shop (name,description,price,imagepath) VALUES ('${name}','${description}','${price}','uploaded_files/${attachment.name}')`, function (error, results, fields) {
+               mc.query(`INSERT INTO ${TABLE_NAME} (${COL_NAME},(${COL_DESC},(${COL_PRICE},${COL_IMAGEPATH}) VALUES ('${name}','${description}','${price}','uploaded_files/${attachment.name}')`, function (error, results, fields) {
                    if (error) return res.send({ error: true, data: error, message: 'Insertion failed.' });
                    var jsonString={ error: false, data: results, message: 'New row was inserted.'};
                    socketControl.sendToConnectedSocket("shop",jsonString);
@@ -41,7 +48,7 @@ module.exports = {
        router.delete('/shop', (req, res) => {
             console.log('request delete', req.body);
             let id = req.body.id;
-            mc.query(`DELETE FROM tbl_shop WHERE id = ${id}`, function (error, results, fields) {
+            mc.query(`DELETE FROM ${TABLE_NAME} WHERE id = ${id}`, function (error, results, fields) {
                 if (error) return res.send({ error: true, data: error, message: 'Deletion failed' });
                 var jsonString={ error: false, data: results, message: `Row with ${id} = id was deleted.` };
                 socketControl.sendToConnectedSocket("shop",jsonString);
@@ -59,7 +66,7 @@ module.exports = {
             let description = req.body.description;
             let price = req.body.price;
             if (!req.files) {
-              mc.query(`UPDATE tbl_shop SET name = '${name}',description = '${description}',price = ${price} WHERE id = ${id}`, function (error, results, fields) {
+              mc.query(`UPDATE ${TABLE_NAME} SET name = '${name}',description = '${description}',price = ${price} WHERE ${COL_ID} = ${id}`, function (error, results, fields) {
                   if (error) return res.send({ error: true, data: error, message: 'Unable to updated record.' });
                   return res.send({ error: false, data: results, message: `Row with ${id} = id has been updated.` });
               });
@@ -71,7 +78,7 @@ module.exports = {
                    return res.status(500).send(err);
                  }
                  console.log(`File uploaded file name: ${attachment.name}`);
-                 mc.query(`UPDATE tbl_shop SET imagepath='uploaded_files/${attachment.name}', name = '${name}',description = '${description}',price = ${price} WHERE id = ${id}`, function (error, results, fields) {
+                 mc.query(`UPDATE ${TABLE_NAME} SET imagepath='uploaded_files/${attachment.name}', name = '${name}',description = '${description}',price = ${price} WHERE ${COL_ID} = ${id}`, function (error, results, fields) {
                      if (error) return res.send({ error: true, data: error, message: 'Unable to update record.' });
                      var jsonString={ error: false, data: results, message: `Row with ${id} = id has been updated.`};
                      socketControl.sendToConnectedSocket("shop",jsonString);
@@ -86,7 +93,7 @@ module.exports = {
     // localhost:3000/api/shop
       router.get('/shop', (req, res) => {
           console.log('request select', req.body);
-          mc.query("SELECT * FROM tbl_shop", function (error, results, fields) {
+          mc.query("SELECT * FROM ${TABLE_NAME}", function (error, results, fields) {
               if (error) res.send({ error: true, data: error, message: 'Unable to fetch rows.' });
               return res.send({ error: false, data: results, message: 'Items has been fetched.' });
           });
@@ -97,7 +104,7 @@ module.exports = {
       router.get('/shop/:name', (req, res) => {
             console.log('request search', req.params.name);
             let keyword = req.params.name;
-            mc.query(`SELECT * FROM tbl_shop WHERE name LIKE '%${keyword}%'`, function (error, results, fields) {
+            mc.query(`SELECT * FROM ${TABLE_NAME} WHERE ${COL_NAME} LIKE '%${keyword}%'`, function (error, results, fields) {
                 if (error) res.send({ error: true, data: error, message: 'Unable to searh a row.' });
                 return res.send({ error: false, data: results, message: 'Filtered item has been fetched.' });
             });
